@@ -130,7 +130,7 @@
     
 }
 
-// remove checkmarks
+// remove checkmarks //
 -(void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView cellForRowAtIndexPath:indexPath].accessoryType = UITableViewCellAccessoryNone;
