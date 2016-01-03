@@ -104,7 +104,7 @@
     
     UIImage *image = contact[@"image"];
     
-    cellIconView.image = (image != nil) ? image : [UIImage imageNamed:@"contact_icon"];
+    cellIconView.image = (image != nil) ? image : [UIImage imageNamed:@"smiley-face"];
     cellIconView.contentScaleFactor = UIViewContentModeScaleAspectFill;
     cellIconView.layer.cornerRadius = CGRectGetHeight(cellIconView.frame) / 2;
  

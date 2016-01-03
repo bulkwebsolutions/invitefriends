@@ -31,7 +31,7 @@
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="81.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" tag="888" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="contact_icon" translatesAutoresizingMaskIntoConstraints="NO" id="InX-t5-njh">
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" tag="888" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="smiley-face" translatesAutoresizingMaskIntoConstraints="NO" id="InX-t5-njh">
                                                     <rect key="frame" x="8" y="10" width="62" height="62"/>
                                                     <animations/>
                                                     <constraints>
@@ -126,6 +126,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="contact_icon" width="512" height="512"/>
+        <image name="smiley-face" width="1024" height="1024"/>
     </resources>
 </document>
