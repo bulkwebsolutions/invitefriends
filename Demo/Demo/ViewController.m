@@ -174,6 +174,14 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // this is working
+    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+        [self.selectedRows addObject:self.tableData[indexPath.row]];
+    }
+    
+    self.selectedUsers = self.selectedRows;
+    NSLog(@"%@", self.selectedUsers);
+    
     // Uncheck the previous checked row
     if(self.checkedIndexPath)
     {
@@ -188,13 +196,7 @@
 //    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
     
     
-    // this is working
-    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
-        [self.selectedRows addObject:self.tableData[indexPath.row]];
-    }
-    
-    self.selectedUsers = self.selectedRows;
-    NSLog(@"%@", self.selectedUsers);
+
     
 
     
@@ -249,12 +251,12 @@
     }
     
     // This should be an array of rows selected from tableview
-    NSArray *titles = [selectedItems valueForKey:@"phones"];
+    NSArray *titles = [self.selectedUsers valueForKey:@"phones"];
     NSArray *value = [titles valueForKey:@"value"];
-    NSLog(@"%@", value);
+   NSLog(@"%@", value);
     
     
-    NSArray *recipents = value[0];
+    NSArray *recipents = [value lastObject];
     
     // Please Download Bold at www.applestore.com/bold/
     NSString *message = [NSString stringWithFormat:@"Sign up to your app link!"];
