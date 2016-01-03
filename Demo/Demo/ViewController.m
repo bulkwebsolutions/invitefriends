@@ -10,11 +10,18 @@
 #import "KTSContactsManager.h"
 #import <MessageUI/MessageUI.h>
 
-@interface ViewController () <KTSContactsManagerDelegate, MFMessageComposeViewControllerDelegate>
+@interface ViewController () <KTSContactsManagerDelegate, MFMessageComposeViewControllerDelegate> {
+    NSIndexPath* checkedIndexPath;
+}
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) NSArray *tableData;
 @property (strong, nonatomic) NSArray *selectedUsers;
+@property (strong, nonatomic) NSMutableArray *stateArray;
+@property (strong, nonatomic) NSMutableArray *selectedRows;
+
+@property (nonatomic, retain) NSIndexPath* checkedIndexPath;
+
 @property (strong, nonatomic) KTSContactsManager *contactsManager;
 
 @end
@@ -30,6 +37,8 @@
     self.contactsManager.sortDescriptors = @[ [NSSortDescriptor sortDescriptorWithKey:@"firstName" ascending:YES] ];
     [self loadData];
     
+    self.stateArray = [[NSMutableArray alloc] init];
+    self.selectedRows = [[NSMutableArray alloc] init];
   
 }
 
@@ -82,59 +91,146 @@
 
 #pragma mark - TableView Methods
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+//- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"contactCell"];
+//    
+//    NSDictionary *contact = [self.tableData objectAtIndex:indexPath.row];
+//    
+//    UILabel *nameLabel = (UILabel *)[cell viewWithTag:1];
+//    NSString *firstName = contact[@"firstName"];
+//    nameLabel.text = [firstName stringByAppendingString:[NSString stringWithFormat:@" %@", contact[@"lastName"]]];
+//    
+//    UILabel *phoneNumber = (UILabel *)[cell viewWithTag:2];
+//    NSArray *phones = contact[@"phones"];
+//    
+//    if ([phones count] > 0) {
+//        NSDictionary *phoneItem = phones[0];
+//        phoneNumber.text = phoneItem[@"value"];
+//    }
+//    
+//    UIImageView *cellIconView = (UIImageView *)[cell.contentView viewWithTag:888];
+//    
+//    UIImage *image = contact[@"image"];
+//    
+//    cellIconView.image = (image != nil) ? image : [UIImage imageNamed:@"smiley-face"];
+//    cellIconView.contentScaleFactor = UIViewContentModeScaleAspectFill;
+//    cellIconView.layer.cornerRadius = CGRectGetHeight(cellIconView.frame) / 2;
+// 
+//  
+//    return cell;
+//}
+
+
+///////////Working/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"contactCell"];
-    
+    static NSString *reuseIdentifier = @"contactCell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
     NSDictionary *contact = [self.tableData objectAtIndex:indexPath.row];
+
+        /* create cell here */
+        
+        UILabel *nameLabel = (UILabel *)[cell viewWithTag:1];
+        NSString *firstName = contact[@"firstName"];
+        nameLabel.text = [firstName stringByAppendingString:[NSString stringWithFormat:@" %@", contact[@"lastName"]]];
+        
+        UILabel *phoneNumber = (UILabel *)[cell viewWithTag:2];
+        NSArray *phones = contact[@"phones"];
+        
+        if ([phones count] > 0) {
+            NSDictionary *phoneItem = phones[0];
+            phoneNumber.text = phoneItem[@"value"];
+        }
+        
+        UIImageView *cellIconView = (UIImageView *)[cell.contentView viewWithTag:888];
+        
+        UIImage *image = contact[@"image"];
+        
+        cellIconView.image = (image != nil) ? image : [UIImage imageNamed:@"smiley-face"];
+        cellIconView.contentScaleFactor = UIViewContentModeScaleAspectFill;
+        cellIconView.layer.cornerRadius = CGRectGetHeight(cellIconView.frame) / 2;
+       
     
-    UILabel *nameLabel = (UILabel *)[cell viewWithTag:1];
-    NSString *firstName = contact[@"firstName"];
-    nameLabel.text = [firstName stringByAppendingString:[NSString stringWithFormat:@" %@", contact[@"lastName"]]];
-    
-    UILabel *phoneNumber = (UILabel *)[cell viewWithTag:2];
-    NSArray *phones = contact[@"phones"];
-    
-    if ([phones count] > 0) {
-        NSDictionary *phoneItem = phones[0];
-        phoneNumber.text = phoneItem[@"value"];
+    if([self.checkedIndexPath isEqual:indexPath])
+    {
+        cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    }
+    else
+    {
+        cell.accessoryType = UITableViewCellAccessoryNone;
     }
     
-    UIImageView *cellIconView = (UIImageView *)[cell.contentView viewWithTag:888];
     
-    UIImage *image = contact[@"image"];
+        // Add Selected rows to array to use with SMS
+     //   self.selectedRows = self.selectedRows;
+      //  NSLog(@"%@", self.selectedRows);
     
-    cellIconView.image = (image != nil) ? image : [UIImage imageNamed:@"smiley-face"];
-    cellIconView.contentScaleFactor = UIViewContentModeScaleAspectFill;
-    cellIconView.layer.cornerRadius = CGRectGetHeight(cellIconView.frame) / 2;
- 
-  
+
+    
     return cell;
 }
 
-// add checkmarks
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
-    // Adding selected row to an Array
-    // Then send a SMS to all phone number
-    NSMutableArray *selectedRows = [[NSMutableArray alloc] init];
-    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
-        [selectedRows addObject:self.tableData[indexPath.row]];
+    // Uncheck the previous checked row
+    if(self.checkedIndexPath)
+    {
+        UITableViewCell* uncheckCell = [tableView cellForRowAtIndexPath:self.checkedIndexPath];
+        uncheckCell.accessoryType = UITableViewCellAccessoryNone;
     }
-    // Add Selected rows to array to use with SMS
-    self.selectedUsers = selectedRows;
-    NSLog(@"%@", selectedRows);
+    UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    self.checkedIndexPath = indexPath;
     
-    [tableView cellForRowAtIndexPath:indexPath].accessoryType = UITableViewCellAccessoryCheckmark;
+//    static NSString *reuseIdentifier = @"contactCell";
+//    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
     
+    
+    // this is working
+    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+        [self.selectedRows addObject:self.tableData[indexPath.row]];
+    }
+    
+    self.selectedUsers = self.selectedRows;
+    NSLog(@"%@", self.selectedUsers);
+    
+
+    
+//    [self.selectedRows replaceObjectAtIndex:indexPath.row withObject:[NSNumber numberWithBool:![[self.selectedRows objectAtIndex:indexPath.row] boolValue]]];
+//    [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }
 
-// remove checkmarks //
--(void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    [tableView cellForRowAtIndexPath:indexPath].accessoryType = UITableViewCellAccessoryNone;
-}
+///////////DoneWorking/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+// add checkmarks
+//- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    
+//    // Adding selected row to an Array
+//    // Then send a SMS to all phone number
+//    NSMutableArray *selectedRows = [[NSMutableArray alloc] init];
+//    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+//        [selectedRows addObject:self.tableData[indexPath.row]];
+//    }
+//    // Add Selected rows to array to use with SMS
+//    self.selectedUsers = selectedRows;
+//    NSLog(@"%@", selectedRows);
+//    
+//    [tableView cellForRowAtIndexPath:indexPath].accessoryType = UITableViewCellAccessoryCheckmark;
+//    
+//}
+//
+//// remove checkmarks //
+//-(void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    [tableView cellForRowAtIndexPath:indexPath].accessoryType = UITableViewCellAccessoryNone;
+//}
+
+///////////End/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
