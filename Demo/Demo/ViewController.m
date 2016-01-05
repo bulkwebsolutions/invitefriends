@@ -19,6 +19,7 @@
 @property (strong, nonatomic) NSMutableArray *selectedUsers;
 @property (strong, nonatomic) NSMutableArray *stateArray;
 @property (strong, nonatomic) NSMutableArray *selectedRows;
+@property (strong, nonatomic) NSMutableArray *recipients;
 
 
 @property (nonatomic, retain) NSIndexPath* checkedIndexPath;
@@ -205,10 +206,20 @@
     NSLog(@"%@", self.selectedUsers);
     
     // Uncheck the previous checked row
-    if ([self.selectedRows containsObject:indexPath]) {
-        [[self.tableView cellForRowAtIndexPath:indexPath] setAccessoryType:UITableViewCellAccessoryNone];
-    } else {
-        [[self.tableView cellForRowAtIndexPath:indexPath] setAccessoryType:UITableViewCellAccessoryCheckmark];
+    if([self.checkedIndexPath isEqual:indexPath])
+    {
+        UITableViewCell* uncheckCell = [tableView
+                                        cellForRowAtIndexPath:self.checkedIndexPath];
+        uncheckCell.accessoryType = UITableViewCellAccessoryNone;
+        [self.selectedUsers removeLastObject];
+        self.checkedIndexPath = nil;
+        
+    }
+    else
+    {
+        UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+        cell.accessoryType = UITableViewCellAccessoryCheckmark;
+        self.checkedIndexPath = indexPath;
     }
 
 }
@@ -267,7 +278,7 @@
     
    // Go inside pull the numbers from the users and save in an NSArray
    NSArray *contacts = self.selectedUsers;
-   NSMutableArray *recipients = [[NSMutableArray alloc] init];
+   self.recipients = [[NSMutableArray alloc] init];
    
 
     for (NSDictionary* dict in contacts) {
@@ -279,13 +290,13 @@
         
          // Grabs the phone numbers
          NSString* value = [dict2 objectForKey:@"value"];
-         [recipients addObject:value];
+         [_recipients addObject:value];
         }
       
     }
 
 
-   NSLog(@"Phone Numbers: %@",recipients);
+   NSLog(@"Phone Numbers: %@",_recipients);
     
 
     
@@ -296,7 +307,7 @@
     
     MFMessageComposeViewController *messageController = [[MFMessageComposeViewController alloc] init];
     messageController.messageComposeDelegate = self;
-    [messageController setRecipients:recipients];
+    [messageController setRecipients:_recipients];
     [messageController setBody:message];
     
     // Present message view controller on screen
