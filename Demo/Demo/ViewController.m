@@ -16,9 +16,10 @@
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (strong, nonatomic) NSArray *tableData;
-@property (strong, nonatomic) NSArray *selectedUsers;
+@property (strong, nonatomic) NSMutableArray *selectedUsers;
 @property (strong, nonatomic) NSMutableArray *stateArray;
 @property (strong, nonatomic) NSMutableArray *selectedRows;
+
 
 @property (nonatomic, retain) NSIndexPath* checkedIndexPath;
 
@@ -153,7 +154,7 @@
         cellIconView.layer.cornerRadius = CGRectGetHeight(cellIconView.frame) / 2;
        
     
-    if([self.checkedIndexPath isEqual:indexPath])
+    if([_checkedIndexPath isEqual:indexPath])
     {
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
     }
@@ -172,9 +173,30 @@
     return cell;
 }
 
+#pragma didSelectRowAtIndexPath
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // this is working
+//    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+//        [self.selectedRows addObject:self.tableData[indexPath.row]];
+//    }
+//    
+//    self.selectedUsers = self.selectedRows;
+//    NSLog(@"%@", self.selectedUsers);
+//    
+//    // Uncheck the previous checked row
+//    if(_checkedIndexPath)
+//    {
+//        UITableViewCell* uncheckCell = [tableView cellForRowAtIndexPath:_checkedIndexPath];
+//        uncheckCell.accessoryType = UITableViewCellAccessoryNone;
+//    }
+//    UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
+//    cell.accessoryType = UITableViewCellAccessoryCheckmark;
+//    _checkedIndexPath = indexPath;
+    
+    
+    
     for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
         [self.selectedRows addObject:self.tableData[indexPath.row]];
     }
@@ -183,27 +205,18 @@
     NSLog(@"%@", self.selectedUsers);
     
     // Uncheck the previous checked row
-    if(self.checkedIndexPath)
-    {
-        UITableViewCell* uncheckCell = [tableView cellForRowAtIndexPath:self.checkedIndexPath];
-        uncheckCell.accessoryType = UITableViewCellAccessoryNone;
+    if ([self.selectedRows containsObject:indexPath]) {
+        [[self.tableView cellForRowAtIndexPath:indexPath] setAccessoryType:UITableViewCellAccessoryNone];
+    } else {
+        [[self.tableView cellForRowAtIndexPath:indexPath] setAccessoryType:UITableViewCellAccessoryCheckmark];
     }
-    UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
-    cell.accessoryType = UITableViewCellAccessoryCheckmark;
-    self.checkedIndexPath = indexPath;
-    
-//    static NSString *reuseIdentifier = @"contactCell";
-//    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
-    
-    
 
-    
-
-    
-//    [self.selectedRows replaceObjectAtIndex:indexPath.row withObject:[NSNumber numberWithBool:![[self.selectedRows objectAtIndex:indexPath.row] boolValue]]];
-//    [tableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 }
 
+-(void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    
+}
 ///////////DoneWorking/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -240,7 +253,7 @@
     return [self.tableData count];
 }
 
-#pragma Message Delegate
+#pragma SMS
 
 - (void)showSMS:(NSArray *)selectedItems {
     
@@ -250,20 +263,40 @@
         return;
     }
     
-    // This should be an array of rows selected from tableview
-    NSArray *titles = [self.selectedUsers valueForKey:@"phones"];
-    NSArray *value = [titles valueForKey:@"value"];
-   NSLog(@"%@", value);
     
     
-    NSArray *recipents = [value lastObject];
+   // Go inside pull the numbers from the users and save in an NSArray
+   NSArray *contacts = self.selectedUsers;
+   NSMutableArray *recipients = [[NSMutableArray alloc] init];
+   
+
+    for (NSDictionary* dict in contacts) {
+        
+        // Grab phones
+         NSDictionary *contactNumber = [dict objectForKey:@"phones"];
+        
+        for (NSDictionary* dict2 in contactNumber) {
+        
+         // Grabs the phone numbers
+         NSString* value = [dict2 objectForKey:@"value"];
+         [recipients addObject:value];
+        }
+      
+    }
+
+
+   NSLog(@"Phone Numbers: %@",recipients);
+    
+
+    
+    
     
     // Please Download Bold at www.applestore.com/bold/
     NSString *message = [NSString stringWithFormat:@"Sign up to your app link!"];
     
     MFMessageComposeViewController *messageController = [[MFMessageComposeViewController alloc] init];
     messageController.messageComposeDelegate = self;
-    [messageController setRecipients:recipents];
+    [messageController setRecipients:recipients];
     [messageController setBody:message];
     
     // Present message view controller on screen
