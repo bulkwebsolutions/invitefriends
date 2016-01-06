@@ -252,16 +252,54 @@
         // get the phone number
         // find a match in _recipient array and remove that item
         
+        NSMutableArray *i = [[NSMutableArray alloc] init];
+        for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+            [i addObject:self.tableData[indexPath.row]];
+            
+            // Go inside pull the numbers from the users and save in an NSArray
+            NSArray *contacts = i;
+            
+       //     self.recipients = [[NSMutableArray alloc] init];
+            
+            
+            for (NSDictionary* dict in contacts) {
+                
+                // Grab phones
+                NSDictionary *contactNumber = [dict objectForKey:@"phones"];
+                
+                for (NSDictionary* dict2 in contactNumber) {
+                    
+                    // Grabs the phone numbers
+                    NSString* value = [dict2 objectForKey:@"value"];
+                    int index = (unsigned long)[self.recipients indexOfObject:value];
+                    
+                    [self.recipients removeObjectAtIndex:(int)index];
+                    NSLog(@"The number that has a checkmark%@", value);
+                    NSLog(@"the array of all%@", self.recipients);
+                    NSLog(@"At index %lu", (unsigned long)[self.recipients indexOfObject:value]);
+                    // [_recipients addObject:value];
+                }
+                
+            }
+            // NSLog(@"Phone Numbers: %@",_recipients);
+        }
+        
+        
+        
+        
+        
+        
+        
        
-        [_recipients removeObjectAtIndex:indexPath.row];
+    //    [_recipients removeObjectAtIndex:indexPath.row];
         // removing checkmark works perfect
 //        UITableViewCell* uncheckCell = [tableView
 //                                        cellForRowAtIndexPath:self.checkedIndexPath];
 //        uncheckCell.accessoryType = UITableViewCellAccessoryNone;
    //     self.checkedIndexPath = nil;
         
-        NSLog(@"first %@", self.checkedIndexPath);
-        NSLog(@"looook %@", _recipients);
+//        NSLog(@"first %@", self.checkedIndexPath);
+//        NSLog(@"looook %@", _recipients);
         
     }
     
