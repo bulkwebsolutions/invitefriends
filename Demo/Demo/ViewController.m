@@ -12,6 +12,7 @@
 
 @interface ViewController () <KTSContactsManagerDelegate, MFMessageComposeViewControllerDelegate> {
     NSIndexPath* checkedIndexPath;
+    NSArray *indexesABC;
 }
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -20,7 +21,7 @@
 @property (strong, nonatomic) NSMutableArray *stateArray;
 @property (strong, nonatomic) NSMutableArray *selectedRows;
 @property (strong, nonatomic) NSMutableArray *recipients;
-
+@property (strong, nonatomic) NSArray *indexesABC;
 
 @property (nonatomic, retain) NSIndexPath* checkedIndexPath;
 
@@ -41,6 +42,10 @@
     
     self.stateArray = [[NSMutableArray alloc] init];
     self.selectedRows = [[NSMutableArray alloc] init];
+    self.selectedUsers = [[NSMutableArray alloc] init];
+    
+    // not working
+        self.indexesABC = @[@"A", @"B", @"C", @"D", @"E", @"F", @"G", @"H", @"I", @"J", @"K", @"L", @"M", @"N", @"O", @"P", @"Q", @"R", @"S", @"T", @"U", @"V", @"W", @"X", @"Y", @"Z"];
   
 }
 
@@ -195,37 +200,95 @@
 //    UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
 //    cell.accessoryType = UITableViewCellAccessoryCheckmark;
 //    _checkedIndexPath = indexPath;
+  //  self.checkedIndexPath = [[NSMutableArray alloc] init];
+    // testing
+//    NSMutableArray *checkedCells = [[NSMutableArray alloc] init];
+//    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+//        self.checkedIndexPath = indexPath;
+//        [checkedCells addObject:self.checkedIndexPath];
+//        NSLog(@"my checked cells %@", checkedCells);
+//    }
     
     
     
-    for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
-        [self.selectedRows addObject:self.tableData[indexPath.row]];
-    }
+   UITableViewCell* checkCell = [tableView cellForRowAtIndexPath:indexPath];
+//    NSMutableDictionary *selectedRow = [[NSMutableDictionary alloc] init];
+//    
+//    if (selectedRow != nil) {
+//        
+//        checkCell.accessoryType = UITableViewCellAccessoryNone;
+//        [selectedRow removeObjectsForKeys:indexPath.row];
+//    } else {
+//        
+//    }
     
-    self.selectedUsers = self.selectedRows;
-    NSLog(@"%@", self.selectedUsers);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     // Uncheck the previous checked row
-    if([self.checkedIndexPath isEqual:indexPath])
+   // if([self.checkedIndexPath isEqual:indexPath])
+     if(checkCell.accessoryType == UITableViewCellAccessoryCheckmark)
     {
-        UITableViewCell* uncheckCell = [tableView
-                                        cellForRowAtIndexPath:self.checkedIndexPath];
-        uncheckCell.accessoryType = UITableViewCellAccessoryNone;
-        [self.selectedUsers removeLastObject];
-        self.checkedIndexPath = nil;
+        checkCell.accessoryType = UITableViewCellAccessoryNone;
+
+       
+        // I cannot removeObjectAtIndex
+        // Because the row I select in the table might not be the index of the item I wish to remove from the array
+        // do
+        // When user selects row that has a checkmark
+        // get the phone number
+        // find a match in _recipient array and remove that item
+        
+       
+        [_recipients removeObjectAtIndex:indexPath.row];
+        // removing checkmark works perfect
+//        UITableViewCell* uncheckCell = [tableView
+//                                        cellForRowAtIndexPath:self.checkedIndexPath];
+//        uncheckCell.accessoryType = UITableViewCellAccessoryNone;
+   //     self.checkedIndexPath = nil;
+        
+        NSLog(@"first %@", self.checkedIndexPath);
+        NSLog(@"looook %@", _recipients);
         
     }
+    
     else
     {
+        [self getNumber];
+        
+        NSOrderedSet *orderedSet = [NSOrderedSet orderedSetWithArray:self.recipients];
+        NSArray *arrayWithoutDuplicates = [orderedSet array];
+   
+        NSLog(@"%@", arrayWithoutDuplicates);
+        
         UITableViewCell* cell = [tableView cellForRowAtIndexPath:indexPath];
         cell.accessoryType = UITableViewCellAccessoryCheckmark;
         self.checkedIndexPath = indexPath;
-    }
+        
+   //     NSLog(@"second %@", self.checkedIndexPath);
+        
+        
 
-}
+    }
+ }
+
 
 -(void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath {
     
+ //   [_recipients removeObjectAtIndex:indexPath.row];
     
 }
 ///////////DoneWorking/////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -257,7 +320,15 @@
 //}
 
 ///////////End/////////////////////////////////////////////////////////////////////////////////////////////////////////
+- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView
+{
+    return self.indexesABC;
+}
 
+- (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index
+{
+    return [self.indexesABC indexOfObject:title];
+}
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
@@ -276,27 +347,7 @@
     
     
     
-   // Go inside pull the numbers from the users and save in an NSArray
-   NSArray *contacts = self.selectedUsers;
-   self.recipients = [[NSMutableArray alloc] init];
-   
-
-    for (NSDictionary* dict in contacts) {
-        
-        // Grab phones
-         NSDictionary *contactNumber = [dict objectForKey:@"phones"];
-        
-        for (NSDictionary* dict2 in contactNumber) {
-        
-         // Grabs the phone numbers
-         NSString* value = [dict2 objectForKey:@"value"];
-         [_recipients addObject:value];
-        }
-      
-    }
-
-
-   NSLog(@"Phone Numbers: %@",_recipients);
+// sorting dict
     
 
     
@@ -336,6 +387,34 @@
     }
     
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+#pragma helper method
+- (void)getNumber {
+    
+for (NSIndexPath *indexPath in [self.tableView indexPathsForSelectedRows]) {
+    [self.selectedUsers addObject:self.tableData[indexPath.row]];
+    
+    // Go inside pull the numbers from the users and save in an NSArray
+    NSArray *contacts = self.selectedUsers;
+    self.recipients = [[NSMutableArray alloc] init];
+    
+    
+    for (NSDictionary* dict in contacts) {
+        
+        // Grab phones
+        NSDictionary *contactNumber = [dict objectForKey:@"phones"];
+        
+        for (NSDictionary* dict2 in contactNumber) {
+            
+            // Grabs the phone numbers
+            NSString* value = [dict2 objectForKey:@"value"];
+            [_recipients addObject:value];
+        }
+        
+    }
+    // NSLog(@"Phone Numbers: %@",_recipients);
+}
 }
 
 @end
